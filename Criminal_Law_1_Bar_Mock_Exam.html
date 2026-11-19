@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Philippine Bar Exam Simulator — Criminal Law 1 (Book I, RPC)</title>
+<style>
+  :root {
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --primary: #1a365d;
+    --primary-light: #2b6cb0;
+    --accent: #b7791f;
+    --text: #1a202c;
+    --muted: #4a5568;
+    --border: #e2e8f0;
+    --success-bg: #f0fff4;
+    --success-border: #68d391;
+    --warn-bg: #fffaf0;
+    --warn-border: #f6ad55;
+    --danger: #c53030;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.65;
+  }
+  header {
+    background: var(--primary);
+    color: #fff;
+    padding: 18px 24px;
+    border-bottom: 4px solid var(--accent);
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  header h1 {
+    margin: 0;
+    font-size: 1.25rem;
+    letter-spacing: 0.3px;
+  }
+  header p {
+    margin: 2px 0 0;
+    font-size: 0.85rem;
+    color: #cbd5e0;
+  }
+  .timer-box {
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.28);
+    border-radius: 8px;
+    padding: 8px 16px;
+    text-align: center;
+    min-width: 145px;
+  }
+  .timer-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #e2e8f0;
+  }
+  .timer-value {
+    font-size: 1.45rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .timer-value.warning { color: #fbd38d; }
+  .timer-value.danger { color: #feb2b2; }
+  main {
+    max-width: 960px;
+    margin: 24px auto 48px;
+    padding: 0 16px;
+  }
+  .nav-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .tab-btn {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-btn:hover { border-color: var(--primary-light); color: var(--primary); }
+  .tab-btn.active {
+    background: var(--primary);
+    color: #fff;
+    border-color: var(--primary);
+  }
+  .tab-btn.done::after {
+    content: " ✓";
+    color: #68d391;
+  }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
+  }
+  .q-meta {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .badge {
+    display: inline-block;
+    background: #ebf8ff;
+    color: #2b6cb0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+  }
+  .problem-text p {
+    margin: 0 0 14px;
+    text-align: justify;
+    font-size: 1rem;
+  }
+  .question-prompt {
+    background: #f8fafc;
+    border-left: 4px solid var(--primary);
+    padding: 14px 16px;
+    font-weight: 600;
+    margin-top: 16px;
+    border-radius: 0 6px 6px 0;
+  }
+  .editor-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+  .alac-hint {
+    font-size: 0.82rem;
+    color: var(--muted);
+    font-weight: 400;
+  }
+  textarea {
+    width: 100%;
+    min-height: 220px;
+    padding: 14px;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1rem;
+    line-height: 1.6;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    resize: vertical;
+  }
+  textarea:focus {
+    outline: none;
+    border-color: var(--primary-light);
+    box-shadow: 0 0 0 3px rgba(43,108,176,0.15);
+  }
+  textarea:disabled {
+    background: #edf2f7;
+    color: #4a5568;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .btn-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  button.btn {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 18px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-primary { background: var(--primary); color: #fff; }
+  .btn-primary:hover { background: #2c5282; }
+  .btn-secondary { background: #edf2f7; color: var(--text); }
+  .btn-secondary:hover { background: #e2e8f0; }
+  .btn-accent { background: var(--accent); color: #fff; }
+  .btn-accent:hover { background: #975a16; }
+  .word-count {
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+  .evaluation-box {
+    display: none;
+    margin-top: 22px;
+    border-top: 2px solid var(--border);
+    padding-top: 20px;
+  }
+  .evaluation-box.visible { display: block; }
+  .score-banner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--success-bg);
+    border: 1px solid var(--success-border);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+  .score-banner.partial {
+    background: var(--warn-bg);
+    border-color: var(--warn-border);
+  }
+  .score-title { font-weight: 700; font-size: 1.05rem; }
+  .score-num { font-size: 1.35rem; font-weight: 800; color: var(--primary); }
+  .rubric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .rubric-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fafafa;
+  }
+  .rubric-item h4 {
+    margin: 0 0 6px;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: space-between;
+  }
+  .rubric-item p {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--muted);
+  }
+  .tag-pass { color: #276749; font-weight: 700; }
+  .tag-miss { color: #c53030; font-weight: 700; }
+  .model-answer {
+    background: #f8fafc;
+    border: 1px solid #cbd5e0;
+    border-radius: 8px;
+    padding: 20px;
+  }
+  .model-answer h3 {
+    margin-top: 0;
+    color: var(--primary);
+    font-size: 1.05rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 8px;
+  }
+  .alac-section {
+    margin-bottom: 14px;
+  }
+  .alac-section strong {
+    color: var(--primary);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.4px;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .summary-panel {
+    display: none;
+  }
+  .summary-panel.visible {
+    display: block;
+  }
+  @media print {
+    header, .nav-tabs, .actions, .btn-group { display: none !important; }
+    .evaluation-box { display: block !important; }
+    body { background: #fff; }
+    .card { box-shadow: none; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <h1>Philippine Bar Exam Mock Simulator</h1>
+      <p>Criminal Law 1 (Book I, Revised Penal Code) • High-Yield 15-Year Doctrines</p>
+    </div>
+    <div class="timer-box">
+      <div class="timer-label">Question Timer</div>
+      <div id="timerDisplay" class="timer-value">10:00</div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="nav-tabs" id="navTabs">
+    <button class="tab-btn active" data-idx="0" onclick="switchQuestion(0)">Question 1</button>
+    <button class="tab-btn" data-idx="1" onclick="switchQuestion(1)">Question 2</button>
+    <button class="tab-btn" data-idx="2" onclick="switchQuestion(2)">Question 3</button>
+    <button class="tab-btn" data-idx="3" onclick="showSummary()">Final Summary</button>
+  </div>
+
+  <div id="questionContainer" class="card">
+    <div class="q-meta">
+      <span id="qTopic" class="badge">Topic</span>
+      <span id="qStatus" style="font-size:0.85rem;color:#4a5568;">10 minutes allotted</span>
+    </div>
+
+    <div id="qProblem" class="problem-text"></div>
+    <div id="qPrompt" class="question-prompt"></div>
+
+    <div style="margin-top:20px;">
+      <div class="editor-label">
+        <span>Your Answer (ALAC Method)</span>
+        <span class="alac-hint">Structure: Answer • Legal Basis • Application • Conclusion</span>
+      </div>
+      <textarea id="answerInput" placeholder="Write your Bar exam answer here. Start with a categorical YES or NO (or direct ruling), state the specific provisions of the Revised Penal Code and doctrines, apply them to the facts, and end with a concise conclusion..."></textarea>
+    </div>
+
+    <div class="actions">
+      <span id="wordCount" class="word-count">0 words</span>
+      <div class="btn-group">
+        <button class="btn btn-secondary" onclick="toggleTimerPause()" id="pauseBtn">Pause Timer</button>
+        <button class="btn btn-secondary" onclick="resetCurrentQuestion()">Reset Question</button>
+        <button class="btn btn-primary" onclick="submitCurrentAnswer()">Submit & Check Substance</button>
+      </div>
+    </div>
+
+    <div id="evaluationBox" class="evaluation-box">
+      <div id="scoreBanner" class="score-banner">
+        <div>
+          <div class="score-title" id="scoreVerdict">Substantive Evaluation</div>
+          <div style="font-size:0.85rem;color:#4a5568;" id="scoreSubtext">Assessed on categorical ruling, legal doctrines, factual application, and structure.</div>
+        </div>
+        <div class="score-num" id="scoreNumeric">0 / 100%</div>
+      </div>
+
+      <div class="rubric-grid" id="rubricGrid"></div>
+
+      <div class="model-answer">
+        <h3>Suggested Bar Answer (ALAC Format)</h3>
+        <div id="modelAnswerContent"></div>
+      </div>
+
+      <div class="actions" style="margin-top:18px;">
+        <span></span>
+        <div class="btn-group">
+          <button class="btn btn-accent" id="nextQBtn" onclick="goNext()">Proceed to Next Question →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="summaryContainer" class="card summary-panel">
+    <h2 style="margin-top:0;color:var(--primary);">Mock Exam Performance Summary</h2>
+    <p style="color:var(--muted);">Review your substantive scores across all three high-yield Criminal Law 1 problems below. You can print or save this page as a PDF for your Bar review notes.</p>
+    <div id="summaryList"></div>
+    <div class="actions" style="margin-top:20px;">
+      <button class="btn btn-secondary" onclick="switchQuestion(0)">Back to Question 1</button>
+      <button class="btn btn-primary" onclick="window.print()">Print / Save Review Sheet</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const questions = [
+  {
+    topic: "Art. 4(1) Proximate Cause • Aberratio Ictus • Praeter Intentionem",
+    paragraphs: [
+      "Enraged after discovering that his neighbor, Dante, had allegedly spread malicious rumors about his family, Marco armed himself with an unlicensed .38 caliber revolver and waited behind a concrete fence along the barangay road. When Marco saw Dante walking home at dusk alongside a 10-year-old boy named Leo, Marco stepped out from behind the fence, aimed directly at Dante's chest from a distance of five meters, and fired a single shot with full intent to kill.",
+      "Because of poor lighting and Marco's unsteady grip, the bullet missed Dante completely and instead struck Leo in the right shoulder. Hearing the gunshot and seeing the bleeding child collapse, Dante panicked, grabbed Leo, and sprinted toward the nearest rural health clinic. While crossing an unlit wooden footbridge in haste, Dante slipped on a wet plank, causing both of them to fall into the shallow rocky creek below; Leo's head struck a submerged boulder, resulting in severe intracranial hemorrhage.",
+      "Leo died at the municipal hospital two hours later. The medico-legal report established that the gunshot wound on Leo's right shoulder was non-fatal and would have healed within two weeks with routine medical care, whereas the fatal cause of death was the traumatic brain injury sustained from hitting the boulder in the creek."
+    ],
+    prompt: "Question: May Marco be held criminally liable for the death of Leo, and what specific felony or felonies did he commit? Explain fully.",
+    rubric: {
+      ruling: {
+        label: "Categorical Answer",
+        expected: "Yes",
+        patterns: [/\byes\b/i, /criminally liable/i, /marco is liable/i],
+        desc: "Must directly affirm that Marco is criminally liable for Leo's death."
+      },
+      legalBasis: {
+        label: "Legal Basis & Doctrines",
+        keywords: [
+          { term: "Article 4", regex: /art(icle)?\.?\s*4/i },
+          { term: "Proximate Cause", regex: /proximate\s*cause/i },
+          { term: "Aberratio Ictus", regex: /aberratio\s*ictus|mistake\s*in\s*(the\s*)?blow/i },
+          { term: "Article 48 (Complex Crime)", regex: /art(icle)?\.?\s*48|complex\s*crime/i },
+          { term: "Praeter Intentionem", regex: /praeter\s*intentionem|art(icle)?\.?\s*13/i }
+        ],
+        desc: "Must cite Art. 4(1) (proximate cause), Aberratio Ictus, and Art. 48 complex crime rules."
+      },
+      application: {
+        label: "Factual Application",
+        keywords: [
+          { term: "Intent to kill Dante / missed shot", regex: /dante/i },
+          { term: "Panic / flight / intervening event", regex: /panic|bridge|creek|boulder|fall/i },
+          { term: "Natural and logical consequence", regex: /natural|logical|direct\s*consequence|efficient\s*intervening/i },
+          { term: "Attempted Murder/Homicide + Homicide", regex: /attempted\s*(murder|homicide)/i }
+        ],
+        desc: "Must connect Marco's shooting to Dante's panic/fall as a natural consequence without efficient intervening cause."
+      }
+    },
+    modelAnswer: {
+      answer: "Yes. Marco is criminally liable for the death of Leo, specifically for the complex crime of Attempted Murder (or Attempted Homicide) with Homicide under Article 48 of the Revised Penal Code, with the mitigating circumstance of praeter intentionem.",
+      legalBasis: "Under Article 4, paragraph 1 of the Revised Penal Code, criminal liability is incurred by any person committing a felony (delito) although the wrongful act done be different from that which he intended. For a person to be held liable for the resulting consequence, the felony committed must be the proximate cause—that cause which, in natural and continuous sequence, unbroken by any efficient intervening cause, produces the injury and without which the result would not have occurred. Furthermore, when a felonious act produces a grave injury to an unintended third person due to a mistake in the blow (aberratio ictus), a single act gives rise to two felonies—one against the intended victim and another against the actual victim—which must be complexed under Article 48 of the Revised Penal Code. Finally, under Article 13(3), lack of intention to commit so grave a wrong (praeter intentionem) mitigates liability when there is a notable disparity between the means employed and the resulting felony.",
+      application: "Here, Marco was committing an intentional felony when he fired his revolver at Dante with intent to kill. Although the bullet missed Dante and struck Leo due to poor aim (aberratio ictus), Dante's immediate flight in panic across the footbridge to save the wounded child was a natural, instinctual, and direct reaction to Marco's unlawful aggression. Slipping on the wet bridge while rescuing a gunshot victim is not an efficient intervening cause that breaks the chain of causation; rather, Marco's shooting set in motion the sequence of events leading directly to Leo's fatal fall onto the boulder. Because Marco's single act of firing the shot resulted in Attempted Murder (qualified by treachery as he lay in wait behind a fence) against Dante and Homicide against Leo, Article 48 applies. However, since a non-fatal shoulder wound unexpectedly led to death via a fall, Marco is entitled to the mitigating circumstance of praeter intentionem.",
+      conclusion: "Therefore, Marco is criminally liable for Leo's death and shall be prosecuted for the complex crime of Attempted Murder with Homicide, appreciated with the mitigating circumstance of praeter intentionem."
+    }
+  },
+  {
+    topic: "Art. 11(1) Self-Defense • Art. 11(4) Avoidance of Greater Evil • Art. 12(4) Accident",
+    paragraphs: [
+      "At around 11:30 p.m., Carlo was driving his sedan along a narrow provincial highway with his pregnant wife in the passenger seat when a motorcycle driven by Rico suddenly swerved into Carlo's lane, forcing Carlo to brake sharply. Enraged by the near-collision, Rico blocked Carlo's car, alighted while brandishing a 10-inch tactical knife, and repeatedly pounded on Carlo's driver-side window while shouting, 'Lumaban ka, papatayin kita!'",
+      "Fearing for his life and that of his pregnant wife as the tempered glass began to crack under the pommel of Rico's knife, Carlo shifted into drive and accelerated forward to escape the blocked road. In the process, the front bumper of Carlo's sedan struck Rico, throwing him onto the pavement. As Carlo sped away to reach the nearest police station two kilometers ahead, the rear wheel of his vehicle accidentally ran over Rico's torso.",
+      "Rico died on the spot due to massive thoracic trauma. The prosecution charged Carlo with Homicide, arguing that using a motor vehicle as a weapon against a man armed only with a knife was disproportionate and that running over Rico a second time negated any claim of self-defense."
+    ],
+    prompt: "Question: Is the prosecution's contention tenable, or can Carlo validly invoke a justifying or exempting circumstance to escape criminal liability for Rico's death? Decide with reasons.",
+    rubric: {
+      ruling: {
+        label: "Categorical Answer",
+        expected: "No",
+        patterns: [/\bno\b/i, /not\s*tenable/i, /untenable/i, /validly\s*invoke/i, /self-defense/i],
+        desc: "Must directly reject the prosecution's contention and affirm Carlo's justifying circumstance."
+      },
+      legalBasis: {
+        label: "Legal Basis & Doctrines",
+        keywords: [
+          { term: "Article 11(1) Self-Defense", regex: /art(icle)?\.?\s*11|self[- ]defense/i },
+          { term: "Unlawful Aggression", regex: /unlawful\s*aggression/i },
+          { term: "Reasonable Necessity", regex: /reasonable\s*necessity/i },
+          { term: "Lack of Sufficient Provocation", regex: /sufficient\s*provocation|lack\s*of\s*provocation/i },
+          { term: "Article 12(4) Accident", regex: /art(icle)?\.?\s*12|accident/i }
+        ],
+        desc: "Must cite Art. 11(1) (three requisites of self-defense) and/or Art. 12(4) (exempting circumstance of accident)."
+      },
+      application: {
+        label: "Factual Application",
+        keywords: [
+          { term: "Cracking window / knife threat", regex: /knife|window|crack|pounding/i },
+          { term: "Rational equivalence (not mathematical)", regex: /rational|commensurate|imminent|escape|means\s*available/i },
+          { term: "Rear wheel / fleeing to police", regex: /rear\s*wheel|police|flee|unintentional/i }
+        ],
+        desc: "Must explain why accelerating forward was a reasonably necessary means of defense and running over Rico was accidental."
+      }
+    },
+    modelAnswer: {
+      answer: "No. The prosecution's contention is untenable; Carlo can validly invoke the justifying circumstance of self-defense under Article 11(1) (as well as defense of a relative under Article 11(2)) of the Revised Penal Code, coupled with the exempting circumstance of accident under Article 12(4) with respect to the rear wheel running over Rico.",
+      legalBasis: "Under Article 11, paragraph 1 of the Revised Penal Code, anyone who acts in defense of his person or rights incurs no criminal liability provided three requisites concur: (1) unlawful aggression on the part of the victim; (2) reasonable necessity of the means employed to prevent or repel it; and (3) lack of sufficient provocation on the part of the person defending himself. Supreme Court jurisprudence holds that reasonable necessity of the means employed does not imply material or mathematical commensurability between the weapon of attack and the weapon of defense, but rather rational equivalence judged from the emergency facing the person attacked. Moreover, under Article 12(4), any person who, while performing a lawful act with due care, causes an injury by mere accident without fault or intention of causing it is exempt from criminal liability.",
+      application: "All three elements of self-defense are present. First, Rico committed actual, imminent unlawful aggression by blocking Carlo's car, brandishing a 10-inch knife, threatening to kill him, and cracking the driver-side window. Second, accelerating the vehicle forward was the only reasonably necessary and available means for Carlo to extricate himself and his pregnant wife from an enclosed space before the glass shattered; the law does not require him to step out of his car to look for a smaller weapon. Third, Carlo gave no sufficient provocation, having merely braked when Rico swerved into his lane. Finally, when Carlo's rear wheel ran over Rico as Carlo sped directly toward the police station, Carlo was performing a lawful act of self-preservation and reporting an incident, rendering the fatal impact of the rear wheel an unintended accident under Article 12(4).",
+      conclusion: "Accordingly, the prosecution's argument fails, and Carlo is completely free from criminal liability for the death of Rico."
+    }
+  },
+  {
+    topic: "Art. 6 Stages of Execution • Art. 8 Conspiracy • Art. 14(16) Treachery",
+    paragraphs: [
+      "Brothers Miguel and Rafael agreed to rob the residence of Don Emilio, a wealthy retired businessman, after learning from Rafael's friend that Don Emilio kept large amounts of cash in his bedroom vault. As part of their plan, Miguel would scale the perimeter wall and disable the exterior CCTV cameras, while Rafael would act as an armed lookout outside the gate to warn of approaching barangay tanods and block any escape.",
+      "At 2:00 a.m., Miguel climbed over the wall, pried open the sliding glass door of the ground floor, and crept silently up the stairs toward the master bedroom. Before Miguel could reach the bedroom door or touch any property, Don Emilio—who was awake due to insomnia—stepped into the hallway holding a licensed shotgun and shouted, 'Halt!' Startled, Miguel immediately jumped through the hallway window back into the yard and ran toward the gate.",
+      "Seeing Don Emilio aiming his shotgun from the second-floor balcony at the fleeing Miguel, Rafael fired two shots from his .45 caliber pistol from behind a parked van outside the gate, hitting Don Emilio in the abdomen and causing him to fall unconscious. Don Emilio survived only because his household staff rushed him to a nearby trauma center within ten minutes. Both Miguel and Rafael were apprehended by responding police officers shortly thereafter."
+    ],
+    prompt: "Question: Determine the respective criminal liabilities of Miguel and Rafael for the offenses committed during the incident, specifying the proper stage of execution and any qualifying or modifying circumstances.",
+    rubric: {
+      ruling: {
+        label: "Categorical Answer",
+        expected: "Both liable",
+        patterns: [/miguel/i, /rafael/i, /attempted\s*robbery/i, /frustrated\s*(murder|homicide)/i],
+        desc: "Must clearly state the specific crimes and stages of execution for both Miguel and Rafael."
+      },
+      legalBasis: {
+        label: "Legal Basis & Doctrines",
+        keywords: [
+          { term: "Article 6 (Attempted vs. Frustrated)", regex: /art(icle)?\.?\s*6|attempted|frustrated/i },
+          { term: "Article 8 (Conspiracy)", regex: /art(icle)?\.?\s*8|conspir/i },
+          { term: "Subjective / Objective Phase", regex: /subjective\s*phase|overt\s*act|acts\s*of\s*execution/i },
+          { term: "Treachery (Alevosia)", regex: /treachery|alevosia|art(icle)?\.?\s*14/i }
+        ],
+        desc: "Must cite Art. 6 (stages of execution), Art. 8 (conspiracy limits), and treachery rules."
+      },
+      application: {
+        label: "Factual Application",
+        keywords: [
+          { term: "Overt acts of robbery (prying door)", regex: /pried|sliding\s*door|wall|subjective\s*phase/i },
+          { term: "Timely medical intervention", regex: /medical|trauma\s*center|survived|mortal/i },
+          { term: "Scope of conspiracy (robbery only vs. shooting)", regex: /scope|agreed\s*to\s*rob|prevent|endeavor/i }
+        ],
+        desc: "Must distinguish their conspiracy to commit robbery from Rafael's independent shooting of Don Emilio."
+      }
+    },
+    modelAnswer: {
+      answer: "Both Miguel and Rafael are criminally liable as co-conspirators for Attempted Robbery in an Inhabited House; however, only Rafael is criminally liable for Frustrated Homicide (or Frustrated Murder if treachery is appreciated, though treachery is absent because Don Emilio was already alerted and armed) for shooting Don Emilio.",
+      legalBasis: "Under Article 6 of the Revised Penal Code, there is an attempt when the offender commences the commission of a felony directly by overt acts and does not perform all the acts of execution which should produce the felony by reason of some cause or accident other than his own spontaneous desistance. A felony is frustrated when the offender performs all the acts of execution which would produce the felony as a consequence but which, nevertheless, do not produce it by reason of causes independent of the will of the perpetrator. Under Article 8, conspiracy exists when two or more persons come to an agreement concerning the commission of a felony and decide to commit it; however, conspirators are liable only for acts falling within the scope of their agreement, unless another conspirator was present and could have prevented the separate offense.",
+      application: "First, as to the robbery, Miguel commenced the commission of robbery by overt acts when he scaled the perimeter wall and pried open the sliding glass door, entering the subjective phase of execution. Because he was intercepted by Don Emilio before reaching the vault and fled not out of spontaneous desistance but due to fear of being shot, the robbery remained in the attempted stage. Since Miguel and Rafael conspired to commit the robbery, both are equally liable as principals for Attempted Robbery. Second, as to the shooting of Don Emilio, Rafael performed all acts of execution by shooting Don Emilio in the abdomen—a mortal wound that would have caused death were it not for the timely medical intervention at the trauma center—making the crime Frustrated Homicide. Treachery does not qualify the shooting because Don Emilio was already awake, armed with a shotgun, and actively pursuing Miguel, negating suddenness and defenselessness. Miguel cannot be held liable for the frustrated homicide because their conspiracy was limited strictly to robbery, and Miguel was running away and had no opportunity to prevent Rafael's unilateral act.",
+      conclusion: "Therefore, Miguel is liable only for Attempted Robbery, whereas Rafael is separately liable for Attempted Robbery and Frustrated Homicide."
+    }
+  }
+];
+
+let currentIdx = 0;
+const state = questions.map(() => ({
+  timeLeft: 600,
+  answer: "",
+  submitted: false,
+  paused: false,
+  score: 0,
+  checks: []
+}));
+
+let timerInterval = null;
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function updateTimerDisplay() {
+  const display = document.getElementById("timerDisplay");
+  if (currentIdx >= questions.length) {
+    display.textContent = "DONE";
+    display.className = "timer-value";
+    return;
+  }
+  const t = state[currentIdx].timeLeft;
+  display.textContent = formatTime(t);
+  display.className = "timer-value";
+  if (t <= 60) display.classList.add("danger");
+  else if (t <= 180) display.classList.add("warning");
+}
+
+function startTimerLoop() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (currentIdx >= questions.length) return;
+    const st = state[currentIdx];
+    if (!st.submitted && !st.paused && st.timeLeft > 0) {
+      st.timeLeft--;
+      updateTimerDisplay();
+      if (st.timeLeft === 0) {
+        submitCurrentAnswer(true);
+      }
+    }
+  }, 1000);
+}
+
+function toggleTimerPause() {
+  if (currentIdx >= questions.length) return;
+  const st = state[currentIdx];
+  if (st.submitted) return;
+  st.paused = !st.paused;
+  document.getElementById("pauseBtn").textContent = st.paused ? "Resume Timer" : "Pause Timer";
+}
+
+function updateWordCount() {
+  const text = document.getElementById("answerInput").value.trim();
+  const count = text ? text.split(/\s+/).length : 0;
+  document.getElementById("wordCount").textContent = `${count} word${count === 1 ? "" : "s"}`;
+}
+
+document.getElementById("answerInput").addEventListener("input", (e) => {
+  if (currentIdx < questions.length) {
+    state[currentIdx].answer = e.target.value;
+    updateWordCount();
+  }
+});
+
+function switchQuestion(idx) {
+  currentIdx = idx;
+  document.getElementById("summaryContainer").classList.remove("visible");
+  document.getElementById("questionContainer").style.display = "block";
+
+  document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+    btn.classList.toggle("active", i === idx);
+    if (i < questions.length && state[i].submitted) {
+      btn.classList.add("done");
+    }
+  });
+
+  const q = questions[idx];
+  const st = state[idx];
+
+  document.getElementById("qTopic").textContent = `Question ${idx + 1} of ${questions.length} • ${q.topic}`;
+  document.getElementById("qStatus").textContent = st.submitted ? "Submitted & Graded" : "10 minutes allotted";
+  document.getElementById("qProblem").innerHTML = q.paragraphs.map(p => `<p>${p}</p>`).join("");
+  document.getElementById("qPrompt").textContent = q.prompt;
+
+  const textarea = document.getElementById("answerInput");
+  textarea.value = st.answer;
+  textarea.disabled = st.submitted;
+  updateWordCount();
+
+  document.getElementById("pauseBtn").textContent = st.paused ? "Resume Timer" : "Pause Timer";
+  document.getElementById("pauseBtn").disabled = st.submitted;
+
+  const evalBox = document.getElementById("evaluationBox");
+  if (st.submitted) {
+    renderEvaluation(idx);
+    evalBox.classList.add("visible");
+  } else {
+    evalBox.classList.remove("visible");
+  }
+
+  document.getElementById("nextQBtn").textContent = idx < questions.length - 1 ? "Proceed to Next Question →" : "View Final Summary →";
+  updateTimerDisplay();
+}
+
+function evaluateSubstance(idx, rawAnswer) {
+  const q = questions[idx];
+  const text = rawAnswer.trim();
+  const checks = [];
+  let earned = 0;
+
+  if (!text) {
+    return {
+      score: 0,
+      checks: [
+        { title: "Categorical Answer (25%)", pass: false, detail: "No answer was submitted before time expired." },
+        { title: "Legal Basis & Doctrines (35%)", pass: false, detail: "Missing Revised Penal Code provisions and doctrines." },
+        { title: "Factual Application (30%)", pass: false, detail: "No application of law to the given facts." },
+        { title: "ALAC Structure & Depth (10%)", pass: false, detail: "Incomplete response structure." }
+      ]
+    };
+  }
+
+  // 1. Categorical Ruling (25 pts)
+  const firstPart = text.slice(0, 180);
+  const rulingMatched = q.rubric.ruling.patterns.some(rx => rx.test(firstPart));
+  if (rulingMatched) {
+    earned += 25;
+    checks.push({
+      title: "Categorical Answer (25%)",
+      pass: true,
+      detail: `Correctly opened with a clear ruling (${q.rubric.ruling.expected}).`
+    });
+  } else {
+    checks.push({
+      title: "Categorical Answer (25%)",
+      pass: false,
+      detail: `Expected an upfront categorical ruling (${q.rubric.ruling.expected}) in the opening sentence.`
+    });
+  }
+
+  // 2. Legal Basis (35 pts)
+  const lbItems = q.rubric.legalBasis.keywords;
+  const matchedLB = lbItems.filter(k => k.regex.test(text));
+  const lbRatio = matchedLB.length / lbItems.length;
+  const lbPoints = Math.round(lbRatio * 35);
+  earned += lbPoints;
+  const missingLB = lbItems.filter(k => !k.regex.test(text)).map(k => k.term);
+  checks.push({
+    title: `Legal Basis (${lbPoints}/35%)`,
+    pass: lbPoints >= 20,
+    detail: matchedLB.length
+      ? `Cited: ${matchedLB.map(k => k.term).join(", ")}.${missingLB.length ? " Missed: " + missingLB.join(", ") + "." : ""}`
+      : `Missed key authorities: ${missingLB.join(", ")}.`
+  });
+
+  // 3. Factual Application (30 pts)
+  const appItems = q.rubric.application.keywords;
+  const matchedApp = appItems.filter(k => k.regex.test(text));
+  const appRatio = matchedApp.length / appItems.length;
+  const appPoints = Math.round(appRatio * 30);
+  earned += appPoints;
+  const missingApp = appItems.filter(k => !k.regex.test(text)).map(k => k.term);
+  checks.push({
+    title: `Factual Application (${appPoints}/30%)`,
+    pass: appPoints >= 18,
+    detail: matchedApp.length
+      ? `Addressed: ${matchedApp.map(k => k.term).join(", ")}.${missingApp.length ? " Consider discussing: " + missingApp.join(", ") + "." : ""}`
+      : `Did not connect key facts (${missingApp.join(", ")}) to the legal elements.`
+  });
+
+  // 4. ALAC Structure & Depth (10 pts)
+  const wordLen = text.split(/\s+/).length;
+  const hasConclusion = /\b(therefore|thus|hence|accordingly|in\s*conclusion|wherefore)\b/i.test(text);
+  let structPoints = 0;
+  if (wordLen >= 60) structPoints += 5;
+  if (hasConclusion) structPoints += 5;
+  earned += structPoints;
+  checks.push({
+    title: `ALAC Structure (${structPoints}/10%)`,
+    pass: structPoints >= 5,
+    detail: `${wordLen} words written. ${hasConclusion ? "Includes a clear concluding wrap-up." : "Add a concluding sentence starting with 'Therefore' or 'Accordingly'."}`
+  });
+
+  return { score: Math.min(100, earned), checks };
+}
+
+function submitCurrentAnswer(autoExpired = false) {
+  const st = state[currentIdx];
+  if (st.submitted) return;
+  st.answer = document.getElementById("answerInput").value;
+  const result = evaluateSubstance(currentIdx, st.answer);
+  st.score = result.score;
+  st.checks = result.checks;
+  st.submitted = true;
+
+  if (autoExpired) {
+    document.getElementById("qStatus").textContent = "Time Expired • Auto-Submitted";
+  } else {
+    document.getElementById("qStatus").textContent = "Submitted & Graded";
+  }
+
+  document.getElementById("answerInput").disabled = true;
+  document.getElementById("pauseBtn").disabled = true;
+  document.querySelectorAll(".tab-btn")[currentIdx].classList.add("done");
+
+  renderEvaluation(currentIdx);
+  document.getElementById("evaluationBox").classList.add("visible");
+}
+
+function renderEvaluation(idx) {
+  const st = state[idx];
+  const q = questions[idx];
+
+  const banner = document.getElementById("scoreBanner");
+  banner.className = st.score >= 70 ? "score-banner" : "score-banner partial";
+  document.getElementById("scoreVerdict").textContent =
+    st.score >= 75 ? "Strong Bar-Ready Substance" :
+    st.score >= 50 ? "Partial Substance — Review Missed Doctrines" :
+    "Needs Substantive Revision";
+  document.getElementById("scoreNumeric").textContent = `${st.score} / 100%`;
+
+  document.getElementById("rubricGrid").innerHTML = st.checks.map(c => `
+    <div class="rubric-item">
+      <h4><span>${c.title}</span><span class="${c.pass ? "tag-pass" : "tag-miss"}">${c.pass ? "PASS" : "REVIEW"}</span></h4>
+      <p>${c.detail}</p>
+    </div>
+  `).join("");
+
+  document.getElementById("modelAnswerContent").innerHTML = `
+    <div class="alac-section"><strong>A — Answer</strong><div>${q.modelAnswer.answer}</div></div>
+    <div class="alac-section"><strong>L — Legal Basis</strong><div>${q.modelAnswer.legalBasis}</div></div>
+    <div class="alac-section"><strong>A — Application</strong><div>${q.modelAnswer.application}</div></div>
+    <div class="alac-section" style="margin-bottom:0;"><strong>C — Conclusion</strong><div>${q.modelAnswer.conclusion}</div></div>
+  `;
+}
+
+function resetCurrentQuestion() {
+  const st = state[currentIdx];
+  st.timeLeft = 600;
+  st.answer = "";
+  st.submitted = false;
+  st.paused = false;
+  st.score = 0;
+  st.checks = [];
+  document.querySelectorAll(".tab-btn")[currentIdx].classList.remove("done");
+  switchQuestion(currentIdx);
+}
+
+function goNext() {
+  if (currentIdx < questions.length - 1) {
+    switchQuestion(currentIdx + 1);
+  } else {
+    showSummary();
+  }
+}
+
+function showSummary() {
+  currentIdx = questions.length;
+  document.getElementById("questionContainer").style.display = "none";
+  document.getElementById("summaryContainer").classList.add("visible");
+  document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+    btn.classList.toggle("active", i === questions.length);
+  });
+  updateTimerDisplay();
+
+  const totalScore = Math.round(state.reduce((acc, s) => acc + s.score, 0) / questions.length);
+  let html = `<div class="score-banner ${totalScore >= 70 ? "" : "partial"}">
+    <div>
+      <div class="score-title">Overall Substantive Average</div>
+      <div style="font-size:0.85rem;color:#4a5568;">Based on 3 High-Yield Criminal Law 1 Bar Questions</div>
+    </div>
+    <div class="score-num">${totalScore} / 100%</div>
+  </div>`;
+
+  questions.forEach((q, i) => {
+    const st = state[i];
+    html += `
+      <div style="border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <strong>Question ${i + 1}: ${q.topic}</strong>
+          <span class="badge">${st.submitted ? `Score: ${st.score}%` : "Not Submitted"}</span>
+        </div>
+        <p style="font-size:0.9rem;color:var(--muted);margin:0 0 10px;"><em>${q.prompt}</em></p>
+        <div style="background:#f8fafc;padding:12px;border-radius:6px;font-size:0.9rem;">
+          <strong>Suggested ALAC Answer:</strong><br>
+          <p style="margin:6px 0;"><strong>Answer:</strong> ${q.modelAnswer.answer}</p>
+          <p style="margin:6px 0;"><strong>Legal Basis:</strong> ${q.modelAnswer.legalBasis}</p>
+          <p style="margin:6px 0;"><strong>Application:</strong> ${q.modelAnswer.application}</p>
+          <p style="margin:6px 0 0;"><strong>Conclusion:</strong> ${q.modelAnswer.conclusion}</p>
+        </div>
+      </div>
+    `;
+  });
+
+  document.getElementById("summaryList").innerHTML = html;
+}
+
+switchQuestion(0);
+startTimerLoop();
+</script>
+</body>
+</html>
